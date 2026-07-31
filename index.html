@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>مفردات — Vocabulário de Árabe</title>
+<style>
+  :root{
+    --ink: #14232A;
+    --surface: #1C3038;
+    --surface-raised: #253E47;
+    --line: rgba(243,238,228,0.12);
+    --text: #F3EEE4;
+    --text-muted: #9FB3B8;
+    --gold: #D4A24C;
+    --gold-soft: rgba(212,162,76,0.18);
+    --coral: #C0503F;
+    --coral-soft: rgba(192,80,63,0.18);
+    --sage: #7FA98C;
+    --sage-soft: rgba(127,169,140,0.18);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: radial-gradient(1200px 800px at 50% -10%, #1E3641 0%, var(--ink) 55%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width: 480px;
+    min-height:100vh;
+    padding: 20px 18px 90px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* Header */
+  header{
+    text-align:center;
+    padding: 18px 0 22px;
+    position:relative;
+  }
+  header .eyebrow{
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color: var(--gold);
+    font-weight:600;
+  }
+  header h1{
+    font-family: "Amiri", Georgia, serif;
+    font-size: 30px;
+    margin: 6px 0 2px;
+    color: var(--text);
+  }
+  header p{
+    margin:0;
+    font-size:13px;
+    color: var(--text-muted);
+  }
+  .mosaic-rule{
+    height:3px;
+    width:64px;
+    margin:14px auto 0;
+    background: repeating-linear-gradient(90deg, var(--gold) 0 8px, transparent 8px 14px);
+    border-radius:2px;
+    opacity:0.7;
+  }
+
+  /* Mode nav */
+  nav.modes{
+    display:flex;
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 18px;
+    border: 1px solid var(--line);
+  }
+  nav.modes button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color: var(--text-muted);
+    padding: 10px 6px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight:600;
+    cursor:pointer;
+    transition: all .2s ease;
+  }
+  nav.modes button.active{
+    background: var(--gold);
+    color: #1B2B25;
+  }
+
+  /* Tag filter */
+  .tags{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:14px;
+    margin-bottom: 4px;
+  }
+  .tags::-webkit-scrollbar{display:none;}
+  .tag-chip{
+    flex:0 0 auto;
+    padding:6px 14px;
+    border-radius:999px;
+    background: var(--surface);
+    border:1px solid var(--line);
+    color: var(--text-muted);
+    font-size:12px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .tag-chip.active{
+    background: var(--gold-soft);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  /* Progress */
+  .progress-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin: 4px 0 18px;
+  }
+  .progress-track{
+    flex:1;
+    height:6px;
+    background: var(--surface);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--gold), var(--coral));
+    border-radius:999px;
+    transition: width .35s ease;
+  }
+  .progress-count{
+    font-size:12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+    text-align:right;
+  }
+
+  /* Main card area */
+  main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-height: 360px;
+  }
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 40px 26px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:-40px; right:-40px;
+    width:120px; height:120px;
+    background: radial-gradient(circle, var(--gold-soft), transparent 70%);
+  }
+  .card .type-label{
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+  .card .headword{
+    font-family: "Amiri", Georgia, serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height:1.3;
+    margin-bottom: 10px;
+    letter-spacing: 0.01em;
+  }
+  .card .translation{
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 18px;
+    color: var(--gold);
+    min-height: 30px;
+  }
+  .hint{
+    text-align:center;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 14px;
+  }
+
+  /* Flashcard buttons */
+  .flip-btn{
+    display:block;
+    margin: 22px auto 0;
+    background: var(--gold);
+    color: #1B2B25;
+    border:none;
+    padding: 12px 28px;
+    border-radius: 999px;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .assess-row{
+    display:flex;
+    gap: 12px;
+    margin-top: 18px;
+  }
+  .assess-btn{
+    flex:1;
+    padding: 14px;
+    border-radius: 14px;
+    border:none;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .assess-btn.wrong{ background: var(--coral-soft); color: var(--coral); border:1px solid var(--coral); }
+  .assess-btn.right{ background: var(--sage-soft); color: var(--sage); border:1px solid var(--sage); }
+
+  /* Quiz options */
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .option{
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    text-align:left;
+    cursor:pointer;
+  }
+  .option.correct{ background: var(--sage-soft); border-color: var(--sage); color: var(--sage); }
+  .option.wrong{ background: var(--coral-soft); border-color: var(--coral); color: var(--coral); }
+  .option:disabled{ cursor:default; }
+
+  /* Typing */
+  .type-form{
+    margin-top: 22px;
+    display:flex;
+    flex-direction:column;
+    gap: 12px;
+  }
+  .type-form input{
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    outline:none;
+  }
+  .type-form input:focus{ border-color: var(--gold); }
+  .type-form button{
+    background: var(--gold);
+    color:#1B2B25;
+    border:none;
+    padding: 13px;
+    border-radius: 12px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .feedback{
+    margin-top: 12px;
+    text-align:center;
+    font-size: 14px;
+    font-weight:600;
+  }
+  .feedback.ok{ color: var(--sage); }
+  .feedback.bad{ color: var(--coral); }
+
+  /* Session summary */
+  .summary{
+    text-align:center;
+  }
+  .summary .big{
+    font-family:"Amiri", Georgia, serif;
+    font-size: 44px;
+    color: var(--gold);
+  }
+  .summary .stats{
+    display:flex;
+    justify-content:center;
+    gap: 24px;
+    margin: 18px 0;
+  }
+  .summary .stat b{ font-size:22px; display:block; }
+  .again-btn{
+    background: var(--gold);
+    color:#1B2B25;
+    border:none;
+    padding: 14px 30px;
+    border-radius: 999px;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    margin-top: 8px;
+  }
+
+  .loading, .error{
+    text-align:center;
+    color: var(--text-muted);
+    padding: 60px 10px;
+  }
+  .error{ color: var(--coral); }
+
+  footer{
+    text-align:center;
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 20px;
+    opacity:0.6;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="eyebrow">Mufradat Yawmiyyé</div>
+    <h1>Dirasé</h1>
+    <p>Vocabulário de árabe libanês</p>
+    <div class="mosaic-rule"></div>
+  </header>
+
+  <nav class="modes" id="modeNav">
+    <button data-mode="flashcard" class="active">Flashcard</button>
+    <button data-mode="quiz">Quiz</button>
+    <button data-mode="typing">Digitação</button>
+  </nav>
+
+  <div class="tags" id="tagFilter"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-count" id="progressCount">0/0</div>
+  </div>
+
+  <main id="main">
+    <div class="loading">Carregando seu vocabulário…</div>
+  </main>
+
+  <footer>conectado ao seu Supabase · sessão local</footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://rjmkmdrdvvfxuacgweru.supabase.co";
+const SUPABASE_KEY = "sb_publishable_8K-zHrQsOO_ZBCQegzPcAQ_3serkhx3";
+const HEADERS = {
+  apikey: SUPABASE_KEY,
+  Authorization: "Bearer " + SUPABASE_KEY,
+  "Content-Type": "application/json"
+};
+const SESSION_SIZE = 10;
+
+let allItems = [];
+let reviewsByItem = {};   // item_id -> { lastResult, count }
+let activeTag = "todos";
+let mode = "flashcard";
+let session = [];         // items picked for this session
+let sessionIndex = 0;
+let sessionResults = { certo: 0, errado: 0 };
+let revealed = false;
+let quizOptions = [];
+let quizAnswered = false;
+
+async function loadData(){
+  try {
+    const itemsRes = await fetch(`${SUPABASE_URL}/rest/v1/items?select=*`, { headers: HEADERS });
+    const itemsStatus = itemsRes.status;
+    let itemsJson = [];
+    try { itemsJson = await itemsRes.json(); } catch(e){ itemsJson = []; }
+
+    if(!itemsRes.ok){
+      document.getElementById("main").innerHTML = `
+        <div class="error">
+          A tabela <b>items</b> respondeu com erro (status ${itemsStatus}).<br><br>
+          <small>${typeof itemsJson === "object" ? JSON.stringify(itemsJson) : itemsJson}</small>
+        </div>`;
+      return;
+    }
+
+    allItems = itemsJson;
+
+    if(allItems.length === 0){
+      document.getElementById("main").innerHTML = `
+        <div class="error">
+          Conectei no Supabase com sucesso (status ${itemsStatus}), mas a tabela <b>items</b> voltou <b>vazia</b>.<br><br>
+          <small>
+          Isso costuma ser um destes três motivos:<br>
+          1) Os dados não foram inseridos de verdade (confira no Table Editor)<br>
+          2) Uma policy de RLS está bloqueando a leitura pro papel <code>anon</code><br>
+          3) A tabela está em outro projeto/schema
+          </small>
+        </div>`;
+      return;
+    }
+
+    const reviewsRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews?select=item_id,result,reviewed_at&order=reviewed_at.desc`, { headers: HEADERS });
+    if(reviewsRes.ok){
+      const reviews = await reviewsRes.json();
+      reviews.forEach(r=>{
+        if(!reviewsByItem[r.item_id]){
+          reviewsByItem[r.item_id] = { lastResult: r.result, count: 1 };
+        } else {
+          reviewsByItem[r.item_id].count++;
+        }
+      });
+    }
+
+    buildTagFilter();
+    startSession();
+  } catch(err){
+    document.getElementById("main").innerHTML = `<div class="error">Erro de rede ao conectar no Supabase.<br><small>${err.message}</small></div>`;
+  }
+}
+
+function buildTagFilter(){
+  const tagSet = new Set();
+  allItems.forEach(i => (i.tags||[]).forEach(t=>tagSet.add(t)));
+  const wrap = document.getElementById("tagFilter");
+  const tags = ["todos", ...Array.from(tagSet).sort()];
+  wrap.innerHTML = tags.map(t=>
+    `<div class="tag-chip ${t===activeTag?'active':''}" data-tag="${t}">${t}</div>`
+  ).join("");
+  wrap.querySelectorAll(".tag-chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      activeTag = chip.dataset.tag;
+      buildTagFilter();
+      startSession();
+    });
+  });
+}
+
+// Peso maior = mais prioridade de aparecer.
+// Nunca revisado > errou recentemente > acertou recentemente.
+function weightFor(item){
+  const r = reviewsByItem[item.id];
+  if(!r) return 10;
+  if(r.lastResult === false) return 8;
+  return 3;
+}
+
+function weightedSample(pool, n){
+  const bag = [];
+  pool.forEach(item=>{
+    const w = weightFor(item);
+    for(let i=0;i<w;i++) bag.push(item);
+  });
+  const picked = [];
+  const usedIds = new Set();
+  let guard = 0;
+  while(picked.length < n && bag.length && guard < 2000){
+    guard++;
+    const candidate = bag[Math.floor(Math.random()*bag.length)];
+    if(!usedIds.has(candidate.id)){
+      picked.push(candidate);
+      usedIds.add(candidate.id);
+    }
+  }
+  return picked;
+}
+
+function startSession(){
+  const pool = activeTag === "todos"
+    ? allItems
+    : allItems.filter(i => (i.tags||[]).includes(activeTag));
+
+  session = weightedSample(pool, Math.min(SESSION_SIZE, pool.length));
+  sessionIndex = 0;
+  sessionResults = { certo: 0, errado: 0 };
+  renderCurrent();
+}
+
+function updateProgress(){
+  const total = session.length;
+  const done = sessionIndex;
+  document.getElementById("progressFill").style.width = total ? `${(done/total)*100}%` : "0%";
+  document.getElementById("progressCount").textContent = `${Math.min(done,total)}/${total}`;
+}
+
+async function submitReview(item, mode, result){
+  try{
+    await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+      method: "POST",
+      headers: { ...HEADERS, Prefer: "return=minimal" },
+      body: JSON.stringify({ item_id: item.id, mode, result })
+    });
+    reviewsByItem[item.id] = { lastResult: result, count: (reviewsByItem[item.id]?.count||0)+1 };
+  } catch(e){ /* silencioso: não trava a sessão por falha de rede */ }
+}
+
+function nextCard(){
+  sessionIndex++;
+  revealed = false;
+  quizAnswered = false;
+  renderCurrent();
+}
+
+function renderCurrent(){
+  updateProgress();
+  const main = document.getElementById("main");
+
+  if(!session.length){
+    main.innerHTML = `<div class="error">Nenhum item encontrado para esse filtro ainda.</div>`;
+    return;
+  }
+  if(sessionIndex >= session.length){
+    main.innerHTML = renderSummary();
+    document.getElementById("againBtn").addEventListener("click", startSession);
+    return;
+  }
+
+  const item = session[sessionIndex];
+  if(mode === "flashcard") renderFlashcard(item);
+  else if(mode === "quiz") renderQuiz(item);
+  else renderTyping(item);
+}
+
+function typeLabel(t){
+  return t === "vocabulario" ? "Vocabulário" : t === "frase" ? "Frase" : "Gramática";
+}
+
+function renderFlashcard(item){
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card">
+      <div class="type-label">${typeLabel(item.type)}</div>
+      <div class="headword">${item.transliteration}</div>
+      <div class="translation">${revealed ? item.translation : ""}</div>
+      ${!revealed ? `<button class="flip-btn" id="flipBtn">Mostrar tradução</button>` : `
+        <div class="assess-row">
+          <button class="assess-btn wrong" id="wrongBtn">Errei</button>
+          <button class="assess-btn right" id="rightBtn">Acertei</button>
+        </div>
+      `}
+    </div>
+  `;
+  if(!revealed){
+    document.getElementById("flipBtn").addEventListener("click", ()=>{
+      revealed = true;
+      renderFlashcard(item);
+    });
+  } else {
+    document.getElementById("wrongBtn").addEventListener("click", async ()=>{
+      sessionResults.errado++;
+      await submitReview(item, "flashcard", false);
+      nextCard();
+    });
+    document.getElementById("rightBtn").addEventListener("click", async ()=>{
+      sessionResults.certo++;
+      await submitReview(item, "flashcard", true);
+      nextCard();
+    });
+  }
+}
+
+function buildQuizOptions(item){
+  const sameType = allItems.filter(i => i.id !== item.id && i.translation !== item.translation);
+  const shuffled = sameType.sort(()=>Math.random()-0.5).slice(0,3).map(i=>i.translation);
+  const opts = [...shuffled, item.translation].sort(()=>Math.random()-0.5);
+  return opts;
+}
+
+function renderQuiz(item){
+  if(!quizAnswered) quizOptions = buildQuizOptions(item);
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card">
+      <div class="type-label">${typeLabel(item.type)}</div>
+      <div class="headword">${item.transliteration}</div>
+      <div class="options" id="optionsWrap">
+        ${quizOptions.map(opt=>`<button class="option" data-opt="${opt.replace(/"/g,'&quot;')}">${opt}</button>`).join("")}
+      </div>
+    </div>
+  `;
+  document.querySelectorAll(".option").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      if(quizAnswered) return;
+      quizAnswered = true;
+      const chosen = btn.dataset.opt;
+      const isCorrect = chosen === item.translation;
+      document.querySelectorAll(".option").forEach(b=>{
+        b.disabled = true;
+        if(b.dataset.opt === item.translation) b.classList.add("correct");
+        else if(b === btn) b.classList.add("wrong");
+      });
+      if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
+      await submitReview(item, "quiz", isCorrect);
+      setTimeout(nextCard, 900);
+    });
+  });
+}
+
+function normalize(str){
+  return (str||"").toLowerCase().trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+}
+
+function renderTyping(item){
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card">
+      <div class="type-label">${typeLabel(item.type)}</div>
+      <div class="headword">${item.transliteration}</div>
+      <div class="type-form">
+        <input type="text" id="typeInput" placeholder="Digite a tradução em português…" autocomplete="off" autocapitalize="off">
+        <button id="typeSubmit">Conferir</button>
+      </div>
+      <div class="feedback" id="typeFeedback"></div>
+    </div>
+  `;
+  const input = document.getElementById("typeInput");
+  const feedback = document.getElementById("typeFeedback");
+  let answered = false;
+  input.focus();
+
+  async function check(){
+    if(answered) return;
+    answered = true;
+    const isCorrect = normalize(input.value) === normalize(item.translation);
+    feedback.textContent = isCorrect ? "Certo! ✓" : `Era: ${item.translation}`;
+    feedback.className = "feedback " + (isCorrect ? "ok" : "bad");
+    if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
+    await submitReview(item, "digitacao", isCorrect);
+    setTimeout(nextCard, 1100);
+  }
+
+  document.getElementById("typeSubmit").addEventListener("click", check);
+  input.addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+}
+
+function renderSummary(){
+  const total = sessionResults.certo + sessionResults.errado;
+  const pct = total ? Math.round((sessionResults.certo/total)*100) : 0;
+  return `
+    <div class="card summary">
+      <div class="type-label">Sessão concluída</div>
+      <div class="big">${pct}%</div>
+      <div class="stats">
+        <div class="stat" style="color:var(--sage)">${sessionResults.certo}<b>acertos</b></div>
+        <div class="stat" style="color:var(--coral)">${sessionResults.errado}<b>erros</b></div>
+      </div>
+      <button class="again-btn" id="againBtn">Nova sessão</button>
+    </div>
+  `;
+}
+
+document.getElementById("modeNav").addEventListener("click", (e)=>{
+  const btn = e.target.closest("button[data-mode]");
+  if(!btn) return;
+  mode = btn.dataset.mode;
+  document.querySelectorAll("#modeNav button").forEach(b=>b.classList.toggle("active", b===btn));
+  revealed = false;
+  quizAnswered = false;
+  renderCurrent();
+});
+
+loadData();
+</script>
+</body>
+</html>
