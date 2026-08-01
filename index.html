@@ -3,336 +3,326 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>مفردات — Vocabulário de Árabe</title>
+<title>Mufradat — Vocabulário de Árabe</title>
 <style>
-  :root{
-    --ink: #14232A;
-    --surface: #1C3038;
-    --surface-raised: #253E47;
-    --line: rgba(243,238,228,0.12);
-    --text: #F3EEE4;
-    --text-muted: #9FB3B8;
-    --gold: #D4A24C;
-    --gold-soft: rgba(212,162,76,0.18);
-    --coral: #C0503F;
-    --coral-soft: rgba(192,80,63,0.18);
-    --sage: #7FA98C;
-    --sage-soft: rgba(127,169,140,0.18);
-    --radius: 18px;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background: radial-gradient(1200px 800px at 50% -10%, #1E3641 0%, var(--ink) 55%);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    min-height: 100vh;
-    display:flex;
-    justify-content:center;
-  }
-  #app{
-    width:100%;
-    max-width: 480px;
-    min-height:100vh;
-    padding: 20px 18px 90px;
-    display:flex;
-    flex-direction:column;
-  }
-
-  /* Header */
-  header{
-    text-align:center;
-    padding: 18px 0 22px;
-    position:relative;
-  }
-  header .eyebrow{
-    font-size:12px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color: var(--gold);
-    font-weight:600;
-  }
-  header h1{
-    font-family: "Amiri", Georgia, serif;
-    font-size: 30px;
-    margin: 6px 0 2px;
-    color: var(--text);
-  }
-  header p{
-    margin:0;
-    font-size:13px;
-    color: var(--text-muted);
-  }
-  .mosaic-rule{
-    height:3px;
-    width:64px;
-    margin:14px auto 0;
-    background: repeating-linear-gradient(90deg, var(--gold) 0 8px, transparent 8px 14px);
-    border-radius:2px;
-    opacity:0.7;
-  }
-
-  /* Mode nav */
-  nav.modes{
-    display:flex;
-    background: var(--surface);
-    border-radius: 999px;
-    padding: 4px;
-    margin-bottom: 18px;
-    border: 1px solid var(--line);
-  }
-  nav.modes button{
-    flex:1;
-    border:none;
-    background:transparent;
-    color: var(--text-muted);
-    padding: 10px 6px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight:600;
-    cursor:pointer;
-    transition: all .2s ease;
-  }
-  nav.modes button.active{
-    background: var(--gold);
-    color: #1B2B25;
-  }
-
-  /* Tag filter */
-  .tags{
-    display:flex;
-    gap:8px;
-    overflow-x:auto;
-    padding-bottom:14px;
-    margin-bottom: 4px;
-  }
-  .tags::-webkit-scrollbar{display:none;}
-  .tag-chip{
-    flex:0 0 auto;
-    padding:6px 14px;
-    border-radius:999px;
-    background: var(--surface);
-    border:1px solid var(--line);
-    color: var(--text-muted);
-    font-size:12px;
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  .tag-chip.active{
-    background: var(--gold-soft);
-    border-color: var(--gold);
-    color: var(--gold);
-  }
-
-  /* Progress */
-  .progress-wrap{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin: 4px 0 18px;
-  }
-  .progress-track{
-    flex:1;
-    height:6px;
-    background: var(--surface);
-    border-radius:999px;
-    overflow:hidden;
-  }
-  .progress-fill{
-    height:100%;
-    background: linear-gradient(90deg, var(--gold), var(--coral));
-    border-radius:999px;
-    transition: width .35s ease;
-  }
-  .progress-count{
-    font-size:12px;
-    color: var(--text-muted);
-    font-variant-numeric: tabular-nums;
-    min-width: 42px;
-    text-align:right;
-  }
-
-  /* Main card area */
-  main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    min-height: 360px;
-  }
-  .card{
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 40px 26px;
-    text-align:center;
-    position:relative;
-    overflow:hidden;
-  }
-  .card::before{
-    content:"";
-    position:absolute;
-    top:-40px; right:-40px;
-    width:120px; height:120px;
-    background: radial-gradient(circle, var(--gold-soft), transparent 70%);
-  }
-  .card .type-label{
-    font-size:11px;
-    letter-spacing:0.1em;
-    text-transform:uppercase;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-  }
-  .card .headword{
-    font-family: "Amiri", Georgia, serif;
-    font-size: 40px;
-    font-weight: 600;
-    line-height:1.3;
-    margin-bottom: 10px;
-    letter-spacing: 0.01em;
-  }
-  .card .translation{
-    font-size: 24px;
-    font-weight: 600;
-    margin-top: 18px;
-    color: var(--gold);
-    min-height: 30px;
-  }
-  .hint{
-    text-align:center;
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-top: 14px;
-  }
-
-  /* Flashcard buttons */
-  .flip-btn{
-    display:block;
-    margin: 22px auto 0;
-    background: var(--gold);
-    color: #1B2B25;
-    border:none;
-    padding: 12px 28px;
-    border-radius: 999px;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-  }
-  .assess-row{
-    display:flex;
-    gap: 12px;
-    margin-top: 18px;
-  }
-  .assess-btn{
-    flex:1;
-    padding: 14px;
-    border-radius: 14px;
-    border:none;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-  }
-  .assess-btn.wrong{ background: var(--coral-soft); color: var(--coral); border:1px solid var(--coral); }
-  .assess-btn.right{ background: var(--sage-soft); color: var(--sage); border:1px solid var(--sage); }
-
-  /* Quiz options */
-  .options{
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  .option{
-    background: var(--surface-raised);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 14px 16px;
-    border-radius: 12px;
-    font-size: 15px;
-    text-align:left;
-    cursor:pointer;
-  }
-  .option.correct{ background: var(--sage-soft); border-color: var(--sage); color: var(--sage); }
-  .option.wrong{ background: var(--coral-soft); border-color: var(--coral); color: var(--coral); }
-  .option:disabled{ cursor:default; }
-
-  /* Typing */
-  .type-form{
-    margin-top: 22px;
-    display:flex;
-    flex-direction:column;
-    gap: 12px;
-  }
-  .type-form input{
-    background: var(--surface-raised);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 14px 16px;
-    border-radius: 12px;
-    font-size: 16px;
-    outline:none;
-  }
-  .type-form input:focus{ border-color: var(--gold); }
-  .type-form button{
-    background: var(--gold);
-    color:#1B2B25;
-    border:none;
-    padding: 13px;
-    border-radius: 12px;
-    font-weight:700;
-    cursor:pointer;
-  }
-  .feedback{
-    margin-top: 12px;
-    text-align:center;
-    font-size: 14px;
-    font-weight:600;
-  }
-  .feedback.ok{ color: var(--sage); }
-  .feedback.bad{ color: var(--coral); }
-
-  /* Session summary */
-  .summary{
-    text-align:center;
-  }
-  .summary .big{
-    font-family:"Amiri", Georgia, serif;
-    font-size: 44px;
-    color: var(--gold);
-  }
-  .summary .stats{
-    display:flex;
-    justify-content:center;
-    gap: 24px;
-    margin: 18px 0;
-  }
-  .summary .stat b{ font-size:22px; display:block; }
-  .again-btn{
-    background: var(--gold);
-    color:#1B2B25;
-    border:none;
-    padding: 14px 30px;
-    border-radius: 999px;
-    font-weight:700;
-    font-size:15px;
-    cursor:pointer;
-    margin-top: 8px;
-  }
-
-  .loading, .error{
-    text-align:center;
-    color: var(--text-muted);
-    padding: 60px 10px;
-  }
-  .error{ color: var(--coral); }
-
-  footer{
-    text-align:center;
-    color: var(--text-muted);
-    font-size: 11px;
-    margin-top: 20px;
-    opacity:0.6;
-  }
+:root{
+  --ink: #14232A;
+  --surface: #1C3038;
+  --surface-raised: #253E47;
+  --line: rgba(243,238,228,0.12);
+  --text: #F3EEE4;
+  --text-muted: #9FB3B8;
+  --gold: #D4A24C;
+  --gold-soft: rgba(212,162,76,0.18);
+  --coral: #C0503F;
+  --coral-soft: rgba(192,80,63,0.18);
+  --sage: #7FA98C;
+  --sage-soft: rgba(127,169,140,0.18);
+  --radius: 18px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background: radial-gradient(1200px 800px at 50% -10%, #1E3641 0%, var(--ink) 55%);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  display:flex;
+  justify-content:center;
+}
+#app{
+  width:100%;
+  max-width: 480px;
+  min-height:100vh;
+  padding: 20px 18px 90px;
+  display:flex;
+  flex-direction:column;
+}
+header{
+  text-align:center;
+  padding: 18px 0 22px;
+  position:relative;
+}
+header .eyebrow{
+  font-size:12px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color: var(--gold);
+  font-weight:600;
+}
+header h1{
+  font-family: "Amiri", Georgia, serif;
+  font-size: 30px;
+  margin: 6px 0 2px;
+  color: var(--text);
+}
+header p{
+  margin:0;
+  font-size:13px;
+  color: var(--text-muted);
+}
+.mosaic-rule{
+  height:3px;
+  width:64px;
+  margin:14px auto 0;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 8px, transparent 8px 14px);
+  border-radius:2px;
+  opacity:0.7;
+}
+nav.modes{
+  display:flex;
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+}
+nav.modes button{
+  flex:1;
+  border:none;
+  background:transparent;
+  color: var(--text-muted);
+  padding: 10px 6px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight:600;
+  cursor:pointer;
+  transition: all .2s ease;
+}
+nav.modes button.active{
+  background: var(--gold);
+  color: #1B2B25;
+}
+.tags{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:14px;
+  margin-bottom: 4px;
+}
+.tags::-webkit-scrollbar{display:none;}
+.tag-chip{
+  flex:0 0 auto;
+  padding:6px 14px;
+  border-radius:999px;
+  background: var(--surface);
+  border:1px solid var(--line);
+  color: var(--text-muted);
+  font-size:12px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.tag-chip.active{
+  background: var(--gold-soft);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.progress-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin: 4px 0 18px;
+}
+.progress-track{
+  flex:1;
+  height:6px;
+  background: var(--surface);
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  background: linear-gradient(90deg, var(--gold), var(--coral));
+  border-radius:999px;
+  transition: width .35s ease;
+}
+.progress-count{
+  font-size:12px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 42px;
+  text-align:right;
+}
+main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height: 360px;
+}
+.card{
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 40px 26px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:"";
+  position:absolute;
+  top:-40px; right:-40px;
+  width:120px; height:120px;
+  background: radial-gradient(circle, var(--gold-soft), transparent 70%);
+}
+.card .type-label{
+  font-size:11px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.card .type-label.new-label{
+  color: var(--sage);
+  font-weight:700;
+}
+.card .headword{
+  font-family: "Amiri", Georgia, serif;
+  font-size: 40px;
+  font-weight: 600;
+  line-height:1.3;
+  margin-bottom: 10px;
+  letter-spacing: 0.01em;
+}
+.card .translation{
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 18px;
+  color: var(--gold);
+  min-height: 30px;
+}
+.card .example{
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 14px;
+  font-style: italic;
+}
+.hint{
+  text-align:center;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 14px;
+}
+.flip-btn{
+  display:block;
+  margin: 22px auto 0;
+  background: var(--gold);
+  color: #1B2B25;
+  border:none;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.assess-row{
+  display:flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+.assess-btn{
+  flex:1;
+  padding: 14px;
+  border-radius: 14px;
+  border:none;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+.assess-btn.wrong{ background: var(--coral-soft); color: var(--coral); border:1px solid var(--coral); }
+.assess-btn.right{ background: var(--sage-soft); color: var(--sage); border:1px solid var(--sage); }
+.options{
+  display:flex;
+  flex-direction:column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.option{
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  text-align:left;
+  cursor:pointer;
+}
+.option.correct{ background: var(--sage-soft); border-color: var(--sage); color: var(--sage); }
+.option.wrong{ background: var(--coral-soft); border-color: var(--coral); color: var(--coral); }
+.option:disabled{ cursor:default; }
+.type-form{
+  margin-top: 22px;
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+}
+.type-form input{
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  outline:none;
+}
+.type-form input:focus{ border-color: var(--gold); }
+.type-form button{
+  background: var(--gold);
+  color:#1B2B25;
+  border:none;
+  padding: 13px;
+  border-radius: 12px;
+  font-weight:700;
+  cursor:pointer;
+}
+.feedback{
+  margin-top: 12px;
+  text-align:center;
+  font-size: 14px;
+  font-weight:600;
+}
+.feedback.ok{ color: var(--sage); }
+.feedback.bad{ color: var(--coral); }
+.summary{
+  text-align:center;
+}
+.summary .big{
+  font-family:"Amiri", Georgia, serif;
+  font-size: 44px;
+  color: var(--gold);
+}
+.summary .stats{
+  display:flex;
+  justify-content:center;
+  gap: 24px;
+  margin: 18px 0;
+}
+.summary .stat b{ font-size:22px; display:block; }
+.again-btn{
+  background: var(--gold);
+  color:#1B2B25;
+  border:none;
+  padding: 14px 30px;
+  border-radius: 999px;
+  font-weight:700;
+  font-size:15px;
+  cursor:pointer;
+  margin-top: 8px;
+}
+.loading, .error{
+  text-align:center;
+  color: var(--text-muted);
+  padding: 60px 10px;
+}
+.error{ color: var(--coral); }
+footer{
+  text-align:center;
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 20px;
+  opacity:0.6;
+}
 </style>
 </head>
 <body>
@@ -372,18 +362,25 @@ const HEADERS = {
   Authorization: "Bearer " + SUPABASE_KEY,
   "Content-Type": "application/json"
 };
+
 const SESSION_SIZE = 10;
+const NEW_ITEMS_PER_SESSION = 5; // limite de itens novos liberados por sessão
+const STAGE_ORDER = ["novo", "aprendendo", "revisao", "consolidado"];
 
 let allItems = [];
-let reviewsByItem = {};   // item_id -> { lastResult, count }
+let reviewsByItem = {}; // item_id -> { lastResult, count }
 let activeTag = "todos";
 let mode = "flashcard";
-let session = [];         // items picked for this session
+let session = []; // items escolhidos para essa sessão (pode incluir itens em exposição)
 let sessionIndex = 0;
 let sessionResults = { certo: 0, errado: 0 };
 let revealed = false;
 let quizOptions = [];
 let quizAnswered = false;
+
+function stageOf(item){
+  return item.stage || "novo";
+}
 
 async function loadData(){
   try {
@@ -453,13 +450,21 @@ function buildTagFilter(){
   });
 }
 
-// Peso maior = mais prioridade de aparecer.
-// Nunca revisado > errou recentemente > acertou recentemente.
+// Peso maior = mais prioridade de aparecer, dentro do pool de itens em revisão
+// (itens "novo" não entram aqui — eles são tratados à parte, com limite próprio).
 function weightFor(item){
-  const r = reviewsByItem[item.id];
-  if(!r) return 10;
-  if(r.lastResult === false) return 8;
-  return 3;
+  const stage = stageOf(item);
+  if(stage === "aprendendo") return 8;
+  if(stage === "revisao"){
+    const r = reviewsByItem[item.id];
+    if(r && r.lastResult === false) return 8;
+    return 4;
+  }
+  return 2; // consolidado
+}
+
+function shuffleArray(arr){
+  return [...arr].sort(()=>Math.random()-0.5);
 }
 
 function weightedSample(pool, n){
@@ -487,7 +492,14 @@ function startSession(){
     ? allItems
     : allItems.filter(i => (i.tags||[]).includes(activeTag));
 
-  session = weightedSample(pool, Math.min(SESSION_SIZE, pool.length));
+  const newPool = pool.filter(i => stageOf(i) === "novo");
+  const reviewPool = pool.filter(i => stageOf(i) !== "novo");
+
+  const newPicked = shuffleArray(newPool).slice(0, Math.min(NEW_ITEMS_PER_SESSION, newPool.length));
+  const remainingSlots = Math.max(0, Math.min(SESSION_SIZE, pool.length) - newPicked.length);
+  const reviewPicked = weightedSample(reviewPool, Math.min(remainingSlots, reviewPool.length));
+
+  session = shuffleArray([...newPicked, ...reviewPicked]);
   sessionIndex = 0;
   sessionResults = { certo: 0, errado: 0 };
   renderCurrent();
@@ -500,15 +512,37 @@ function updateProgress(){
   document.getElementById("progressCount").textContent = `${Math.min(done,total)}/${total}`;
 }
 
-async function submitReview(item, mode, result){
+async function submitReview(item, reviewMode, result){
   try{
     await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
       method: "POST",
       headers: { ...HEADERS, Prefer: "return=minimal" },
-      body: JSON.stringify({ item_id: item.id, mode, result })
+      body: JSON.stringify({ item_id: item.id, mode: reviewMode, result })
     });
     reviewsByItem[item.id] = { lastResult: result, count: (reviewsByItem[item.id]?.count||0)+1 };
   } catch(e){ /* silencioso: não trava a sessão por falha de rede */ }
+}
+
+async function updateItemStage(item, newStage){
+  item.stage = newStage;
+  try{
+    await fetch(`${SUPABASE_URL}/rest/v1/items?id=eq.${item.id}`, {
+      method: "PATCH",
+      headers: { ...HEADERS, Prefer: "return=minimal" },
+      body: JSON.stringify({ stage: newStage })
+    });
+  } catch(e){ /* silencioso: não trava a sessão por falha de rede */ }
+}
+
+function nextStageOnResult(currentStage, correct){
+  let idx = STAGE_ORDER.indexOf(currentStage || "novo");
+  if(idx < 0) idx = 0;
+  if(correct){
+    idx = Math.min(idx + 1, STAGE_ORDER.length - 1);
+  } else {
+    idx = Math.max(idx - 1, 1); // um erro em revisão não volta pro modo "exposição"
+  }
+  return STAGE_ORDER[idx];
 }
 
 function nextCard(){
@@ -521,7 +555,6 @@ function nextCard(){
 function renderCurrent(){
   updateProgress();
   const main = document.getElementById("main");
-
   if(!session.length){
     main.innerHTML = `<div class="error">Nenhum item encontrado para esse filtro ainda.</div>`;
     return;
@@ -531,15 +564,34 @@ function renderCurrent(){
     document.getElementById("againBtn").addEventListener("click", startSession);
     return;
   }
-
   const item = session[sessionIndex];
-  if(mode === "flashcard") renderFlashcard(item);
+  if(stageOf(item) === "novo"){
+    renderExposure(item);
+  } else if(mode === "flashcard") renderFlashcard(item);
   else if(mode === "quiz") renderQuiz(item);
   else renderTyping(item);
 }
 
 function typeLabel(t){
   return t === "vocabulario" ? "Vocabulário" : t === "frase" ? "Frase" : "Gramática";
+}
+
+// Modo de primeira exposição: sem cobrança, só reconhecimento passivo.
+function renderExposure(item){
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card">
+      <div class="type-label new-label">Palavra nova · ${typeLabel(item.type)}</div>
+      <div class="headword">${item.transliteration}</div>
+      <div class="translation">${item.translation}</div>
+      ${item.notes ? `<div class="example">${item.notes}</div>` : ""}
+      <button class="flip-btn" id="exposureNext">Próximo</button>
+    </div>
+  `;
+  document.getElementById("exposureNext").addEventListener("click", async ()=>{
+    await updateItemStage(item, "aprendendo");
+    nextCard();
+  });
 }
 
 function renderFlashcard(item){
@@ -566,11 +618,13 @@ function renderFlashcard(item){
     document.getElementById("wrongBtn").addEventListener("click", async ()=>{
       sessionResults.errado++;
       await submitReview(item, "flashcard", false);
+      await updateItemStage(item, nextStageOnResult(item.stage, false));
       nextCard();
     });
     document.getElementById("rightBtn").addEventListener("click", async ()=>{
       sessionResults.certo++;
       await submitReview(item, "flashcard", true);
+      await updateItemStage(item, nextStageOnResult(item.stage, true));
       nextCard();
     });
   }
@@ -608,6 +662,7 @@ function renderQuiz(item){
       });
       if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
       await submitReview(item, "quiz", isCorrect);
+      await updateItemStage(item, nextStageOnResult(item.stage, isCorrect));
       setTimeout(nextCard, 900);
     });
   });
@@ -644,6 +699,7 @@ function renderTyping(item){
     feedback.className = "feedback " + (isCorrect ? "ok" : "bad");
     if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
     await submitReview(item, "digitacao", isCorrect);
+    await updateItemStage(item, nextStageOnResult(item.stage, isCorrect));
     setTimeout(nextCard, 1100);
   }
 
