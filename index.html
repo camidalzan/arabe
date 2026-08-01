@@ -670,7 +670,14 @@ function renderQuiz(item){
 
 function normalize(str){
   return (str||"").toLowerCase().trim()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[0-9]/g, ""); // números representam letras árabes específicas — ignorados na checagem
+}
+
+// Alguns itens têm mais de uma grafia válida, separadas por "/" (ex: "bay / bayy").
+// Qualquer uma delas conta como resposta certa.
+function acceptableAnswers(transliteration){
+  return (transliteration||"").split("/").map(s => normalize(s)).filter(Boolean);
 }
 
 function renderTyping(item){
@@ -678,9 +685,9 @@ function renderTyping(item){
   main.innerHTML = `
     <div class="card">
       <div class="type-label">${typeLabel(item.type)}</div>
-      <div class="headword">${item.transliteration}</div>
+      <div class="headword">${item.translation}</div>
       <div class="type-form">
-        <input type="text" id="typeInput" placeholder="Digite a tradução em português…" autocomplete="off" autocapitalize="off">
+        <input type="text" id="typeInput" placeholder="Digite em árabe (transliteração)…" autocomplete="off" autocapitalize="off">
         <button id="typeSubmit">Conferir</button>
       </div>
       <div class="feedback" id="typeFeedback"></div>
@@ -694,8 +701,8 @@ function renderTyping(item){
   async function check(){
     if(answered) return;
     answered = true;
-    const isCorrect = normalize(input.value) === normalize(item.translation);
-    feedback.textContent = isCorrect ? "Certo! ✓" : `Era: ${item.translation}`;
+    const isCorrect = acceptableAnswers(item.transliteration).includes(normalize(input.value));
+    feedback.textContent = isCorrect ? "Certo! ✓" : `Era: ${item.transliteration}`;
     feedback.className = "feedback " + (isCorrect ? "ok" : "bad");
     if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
     await submitReview(item, "digitacao", isCorrect);
