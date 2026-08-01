@@ -76,17 +76,20 @@ nav.modes{
   padding: 4px;
   margin-bottom: 18px;
   border: 1px solid var(--line);
+  overflow-x:auto;
 }
+nav.modes::-webkit-scrollbar{display:none;}
 nav.modes button{
-  flex:1;
+  flex:0 0 auto;
   border:none;
   background:transparent;
   color: var(--text-muted);
-  padding: 10px 6px;
+  padding: 10px 14px;
   border-radius: 999px;
   font-size: 13px;
   font-weight:600;
   cursor:pointer;
+  white-space:nowrap;
   transition: all .2s ease;
 }
 nav.modes button.active{
@@ -284,6 +287,70 @@ main{
 }
 .feedback.ok{ color: var(--sage); }
 .feedback.bad{ color: var(--coral); }
+.built-row{
+  min-height: 44px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin: 18px 0 10px;
+}
+.bank-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+}
+.word-chip{
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight:600;
+  cursor:pointer;
+  border:1px solid var(--line);
+}
+.word-chip.bank{
+  background: var(--surface-raised);
+  color: var(--text);
+}
+.word-chip.placed{
+  background: var(--gold-soft);
+  color: var(--gold);
+  border-color: var(--gold);
+  cursor:default;
+}
+.pares-grid{
+  display:flex;
+  gap: 10px;
+}
+.pares-col{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.pares-chip{
+  background: var(--surface);
+  border:1px solid var(--line);
+  color: var(--text);
+  padding: 12px 8px;
+  border-radius: 12px;
+  font-size:14px;
+  cursor:pointer;
+  text-align:center;
+}
+.pares-chip.selected{
+  border-color: var(--gold);
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+.pares-chip.matched{
+  background: var(--sage-soft);
+  border-color: var(--sage);
+  color: var(--sage);
+  opacity:0.65;
+  cursor:default;
+}
 .summary{
   text-align:center;
 }
@@ -338,6 +405,9 @@ footer{
     <button data-mode="flashcard" class="active">Flashcard</button>
     <button data-mode="quiz">Quiz</button>
     <button data-mode="typing">Digitação</button>
+    <button data-mode="ordenar">Ordenar</button>
+    <button data-mode="lacuna">Lacuna</button>
+    <button data-mode="pares">Pares</button>
   </nav>
 
   <div class="tags" id="tagFilter"></div>
@@ -373,13 +443,26 @@ let activeTag = "todos";
 let mode = "flashcard";
 let session = []; // items escolhidos para essa sessão (pode incluir itens em exposição)
 let sessionIndex = 0;
-let sessionResults = { certo: 0, errado: 0 };
+let sessionResults = { certo: 0, errado: 0, novos: 0 };
 let revealed = false;
 let quizOptions = [];
 let quizAnswered = false;
+let phraseSession = []; // pool de itens com mais de uma palavra, usado por ordenar/lacuna
+let phraseIndex = 0;
+let paresState = null; // estado do modo combinar pares
 
 function stageOf(item){
   return item.stage || "novo";
+}
+
+function isPhraseItem(item){
+  return item.transliteration.trim().split(/\s+/).length >= 2;
+}
+
+function restartForMode(){
+  if(mode === "ordenar" || mode === "lacuna") startPhraseSession();
+  else if(mode === "pares") startParesRound();
+  else startSession();
 }
 
 async function loadData(){
@@ -445,7 +528,7 @@ function buildTagFilter(){
     chip.addEventListener("click", ()=>{
       activeTag = chip.dataset.tag;
       buildTagFilter();
-      startSession();
+      restartForMode();
     });
   });
 }
@@ -501,7 +584,7 @@ function startSession(){
 
   session = shuffleArray([...newPicked, ...reviewPicked]);
   sessionIndex = 0;
-  sessionResults = { certo: 0, errado: 0 };
+  sessionResults = { certo: 0, errado: 0, novos: 0 };
   renderCurrent();
 }
 
@@ -561,7 +644,7 @@ function renderCurrent(){
   }
   if(sessionIndex >= session.length){
     main.innerHTML = renderSummary();
-    document.getElementById("againBtn").addEventListener("click", startSession);
+    document.getElementById("againBtn").addEventListener("click", restartForMode);
     return;
   }
   const item = session[sessionIndex];
@@ -589,6 +672,7 @@ function renderExposure(item){
     </div>
   `;
   document.getElementById("exposureNext").addEventListener("click", async ()=>{
+    sessionResults.novos++;
     await updateItemStage(item, "aprendendo");
     nextCard();
   });
@@ -717,17 +801,252 @@ function renderTyping(item){
 function renderSummary(){
   const total = sessionResults.certo + sessionResults.errado;
   const pct = total ? Math.round((sessionResults.certo/total)*100) : 0;
+  const pctLabel = total ? `${pct}%` : "—";
   return `
     <div class="card summary">
       <div class="type-label">Sessão concluída</div>
-      <div class="big">${pct}%</div>
+      <div class="big">${pctLabel}</div>
+      ${total ? "" : `<div class="hint">Nenhum item testado essa sessão — só exposição a itens novos.</div>`}
       <div class="stats">
+        <div class="stat" style="color:var(--gold)">${sessionResults.novos}<b>novas vistas</b></div>
         <div class="stat" style="color:var(--sage)">${sessionResults.certo}<b>acertos</b></div>
         <div class="stat" style="color:var(--coral)">${sessionResults.errado}<b>erros</b></div>
       </div>
       <button class="again-btn" id="againBtn">Nova sessão</button>
     </div>
   `;
+}
+
+// ---------- Modo: Ordenar frase ----------
+
+function startPhraseSession(){
+  const pool = (activeTag === "todos" ? allItems : allItems.filter(i => (i.tags||[]).includes(activeTag)))
+    .filter(isPhraseItem);
+  phraseSession = shuffleArray(pool).slice(0, Math.min(SESSION_SIZE, pool.length));
+  phraseIndex = 0;
+  sessionResults = { certo: 0, errado: 0, novos: 0 };
+  renderPhraseCurrent();
+}
+
+function nextPhraseCard(){
+  phraseIndex++;
+  renderPhraseCurrent();
+}
+
+function renderPhraseCurrent(){
+  const total = phraseSession.length;
+  document.getElementById("progressFill").style.width = total ? `${(phraseIndex/total)*100}%` : "0%";
+  document.getElementById("progressCount").textContent = `${Math.min(phraseIndex,total)}/${total}`;
+  const main = document.getElementById("main");
+
+  if(!phraseSession.length){
+    main.innerHTML = `<div class="error">Ainda não há frases suficientes cadastradas nesse filtro (esse modo precisa de itens com mais de uma palavra).</div>`;
+    return;
+  }
+  if(phraseIndex >= phraseSession.length){
+    main.innerHTML = renderSummary();
+    document.getElementById("againBtn").addEventListener("click", restartForMode);
+    return;
+  }
+  const item = phraseSession[phraseIndex];
+  if(mode === "ordenar") renderOrdenar(item);
+  else renderLacuna(item);
+}
+
+function renderOrdenar(item){
+  const words = item.transliteration.trim().split(/\s+/);
+  const shuffledIdx = shuffleArray(words.map((w,i)=>i));
+  let built = [];
+  const main = document.getElementById("main");
+
+  function draw(){
+    main.innerHTML = `
+      <div class="card">
+        <div class="type-label">Ordene a frase</div>
+        <div class="translation">${item.translation}</div>
+        <div class="built-row">${
+          built.length
+            ? built.map(idx=>`<span class="word-chip placed">${words[idx]}</span>`).join("")
+            : '<span class="hint">Toque nas palavras abaixo, na ordem certa</span>'
+        }</div>
+        <div class="bank-row">${
+          shuffledIdx.filter(i=>!built.includes(i)).map(i=>`<button class="word-chip bank" data-idx="${i}">${words[i]}</button>`).join("")
+        }</div>
+        <div class="assess-row" style="margin-top:14px;">
+          <button class="assess-btn wrong" id="undoBtn" ${built.length===0?"disabled":""}>Desfazer</button>
+          <button class="assess-btn right" id="checkOrderBtn" ${built.length!==words.length?"disabled":""}>Conferir</button>
+        </div>
+        <div class="feedback" id="orderFeedback"></div>
+      </div>
+    `;
+    document.querySelectorAll(".bank-row .word-chip").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        built.push(parseInt(btn.dataset.idx));
+        draw();
+      });
+    });
+    const undoBtn = document.getElementById("undoBtn");
+    if(!undoBtn.disabled) undoBtn.addEventListener("click", ()=>{ built.pop(); draw(); });
+    const checkBtn = document.getElementById("checkOrderBtn");
+    if(!checkBtn.disabled) checkBtn.addEventListener("click", submitOrder);
+  }
+
+  async function submitOrder(){
+    const attempt = built.map(i=>normalize(words[i])).join(" ");
+    const correct = words.map(w=>normalize(w)).join(" ");
+    const isCorrect = attempt === correct;
+    const fb = document.getElementById("orderFeedback");
+    fb.textContent = isCorrect ? "Certo! ✓" : `Ordem certa: ${words.join(" ")}`;
+    fb.className = "feedback " + (isCorrect ? "ok" : "bad");
+    if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
+    await submitReview(item, "ordenar", isCorrect);
+    await updateItemStage(item, nextStageOnResult(item.stage, isCorrect));
+    setTimeout(nextPhraseCard, 1300);
+  }
+
+  draw();
+}
+
+// ---------- Modo: Completar lacuna ----------
+
+function collectDistractorWords(excludeWord){
+  const pool = new Set();
+  allItems.forEach(i=>{
+    i.transliteration.trim().split(/\s+/).forEach(w=>{
+      if(w.length > 1 && normalize(w) !== normalize(excludeWord)) pool.add(w);
+    });
+  });
+  return shuffleArray(Array.from(pool)).slice(0,3);
+}
+
+function renderLacuna(item){
+  const words = item.transliteration.trim().split(/\s+/);
+  const blankIdx = Math.floor(Math.random()*words.length);
+  const correctWord = words[blankIdx];
+  const sentence = words.map((w,i)=> i===blankIdx ? "____" : w).join(" ");
+  const options = shuffleArray([...collectDistractorWords(correctWord), correctWord]);
+
+  const main = document.getElementById("main");
+  main.innerHTML = `
+    <div class="card">
+      <div class="type-label">Complete a frase</div>
+      <div class="headword" style="font-size:26px;">${sentence}</div>
+      <div class="translation" style="font-size:16px;">${item.translation}</div>
+      <div class="options" id="lacunaOptions">
+        ${options.map(opt=>`<button class="option" data-opt="${opt.replace(/"/g,'&quot;')}">${opt}</button>`).join("")}
+      </div>
+    </div>
+  `;
+  let answered = false;
+  document.querySelectorAll("#lacunaOptions .option").forEach(btn=>{
+    btn.addEventListener("click", async ()=>{
+      if(answered) return;
+      answered = true;
+      const chosen = btn.dataset.opt;
+      const isCorrect = normalize(chosen) === normalize(correctWord);
+      document.querySelectorAll("#lacunaOptions .option").forEach(b=>{
+        b.disabled = true;
+        if(normalize(b.dataset.opt) === normalize(correctWord)) b.classList.add("correct");
+        else if(b === btn) b.classList.add("wrong");
+      });
+      if(isCorrect) sessionResults.certo++; else sessionResults.errado++;
+      await submitReview(item, "lacuna", isCorrect);
+      await updateItemStage(item, nextStageOnResult(item.stage, isCorrect));
+      setTimeout(nextPhraseCard, 900);
+    });
+  });
+}
+
+// ---------- Modo: Combinar pares ----------
+
+function findParesItem(id){
+  return paresState.items.find(i=>i.id===id);
+}
+
+function startParesRound(){
+  const pool = activeTag === "todos" ? allItems : allItems.filter(i => (i.tags||[]).includes(activeTag));
+  const picked = shuffleArray(pool).slice(0, Math.min(6, pool.length));
+  paresState = {
+    items: picked,
+    leftOrder: shuffleArray(picked.map(i=>i.id)),
+    rightOrder: shuffleArray(picked.map(i=>i.id)),
+    matched: new Set(),
+    selectedLeft: null,
+    selectedRight: null
+  };
+  renderPares();
+}
+
+function checkParesMatch(){
+  if(paresState.selectedLeft && paresState.selectedRight){
+    if(paresState.selectedLeft === paresState.selectedRight){
+      const id = paresState.selectedLeft;
+      paresState.matched.add(id);
+      const it = findParesItem(id);
+      submitReview(it, "pares", true);
+      updateItemStage(it, nextStageOnResult(it.stage, true));
+    }
+    paresState.selectedLeft = null;
+    paresState.selectedRight = null;
+  }
+}
+
+function renderPares(){
+  const total = paresState.items.length;
+  document.getElementById("progressFill").style.width = total ? `${(paresState.matched.size/total)*100}%` : "0%";
+  document.getElementById("progressCount").textContent = `${paresState.matched.size}/${total}`;
+
+  const main = document.getElementById("main");
+  if(!total){
+    main.innerHTML = `<div class="error">Não há itens suficientes nesse filtro.</div>`;
+    return;
+  }
+  if(paresState.matched.size === total){
+    main.innerHTML = `
+      <div class="card summary">
+        <div class="type-label">Rodada concluída</div>
+        <div class="big">${total}/${total}</div>
+        <button class="again-btn" id="againBtn">Nova rodada</button>
+      </div>
+    `;
+    document.getElementById("againBtn").addEventListener("click", startParesRound);
+    return;
+  }
+
+  main.innerHTML = `
+    <div class="pares-grid">
+      <div class="pares-col" id="paresLeft">
+        ${paresState.leftOrder.map(id=>{
+          const it = findParesItem(id);
+          const isMatched = paresState.matched.has(id);
+          const isSelected = paresState.selectedLeft === id;
+          return `<button class="pares-chip ${isMatched?'matched':''} ${isSelected?'selected':''}" data-id="${id}" ${isMatched?'disabled':''}>${it.transliteration}</button>`;
+        }).join("")}
+      </div>
+      <div class="pares-col" id="paresRight">
+        ${paresState.rightOrder.map(id=>{
+          const it = findParesItem(id);
+          const isMatched = paresState.matched.has(id);
+          const isSelected = paresState.selectedRight === id;
+          return `<button class="pares-chip ${isMatched?'matched':''} ${isSelected?'selected':''}" data-id="${id}" ${isMatched?'disabled':''}>${it.translation}</button>`;
+        }).join("")}
+      </div>
+    </div>
+  `;
+  document.querySelectorAll("#paresLeft .pares-chip:not(:disabled)").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      paresState.selectedLeft = btn.dataset.id;
+      checkParesMatch();
+      renderPares();
+    });
+  });
+  document.querySelectorAll("#paresRight .pares-chip:not(:disabled)").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      paresState.selectedRight = btn.dataset.id;
+      checkParesMatch();
+      renderPares();
+    });
+  });
 }
 
 document.getElementById("modeNav").addEventListener("click", (e)=>{
@@ -737,7 +1056,9 @@ document.getElementById("modeNav").addEventListener("click", (e)=>{
   document.querySelectorAll("#modeNav button").forEach(b=>b.classList.toggle("active", b===btn));
   revealed = false;
   quizAnswered = false;
-  renderCurrent();
+  if(mode === "ordenar" || mode === "lacuna") startPhraseSession();
+  else if(mode === "pares") startParesRound();
+  else renderCurrent();
 });
 
 loadData();
